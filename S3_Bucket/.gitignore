@@ -1,0 +1,9 @@
+./
+../
+**/.terraform/*
+*.tfstate
+*.tfstate.backup
+*.lock.hcl
+*.pem
+*.pub
+ec2_key_pair-tf
