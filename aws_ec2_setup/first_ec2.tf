@@ -4,8 +4,9 @@ provider "aws" {
   region = "us-east-1"
 
 }
+
+# Key pair (Login) Generate form AWS.
 /*
-# Key pair (Login)
 resource "aws_key_pair" "my_key" {
   key_name   = "ec2-key-pair-tf"
   public_key = file("ec2_key_pair-tf.pub") # Replace the correct key pair file name.
