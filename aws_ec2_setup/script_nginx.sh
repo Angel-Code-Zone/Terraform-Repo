@@ -16,7 +16,7 @@ systemctl start nginx
 systemctl enable nginx
 
 # Create a simple HTML page
-echo "<h1> Hello, Learning the Terraform </h1>" >>  /var/www/html/index.nginx-debian.html
+echo "<h1> Hello, Learning the Terraform </h1>" >  /var/www/html/index.nginx-debian.html
 
 # Adjust the firewall to allow HTTP traffic
 ufw allow 'Nginx Full'
