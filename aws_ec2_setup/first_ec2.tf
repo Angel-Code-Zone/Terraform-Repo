@@ -1,5 +1,5 @@
-# Terraform provider
-/*
+# Terraform provider & ec2 with default VPC or user_data.
+
 provider "aws" {
   region = "us-east-1"
 
@@ -57,7 +57,7 @@ resource "aws_instance" "linux" {
   security_groups = [aws_security_group.my_security_group.name]
   instance_type   = "t2.micro"
   ami             = "ami-0b6c6ebed2801a5cb" # (ubuntu ami) replace with correct ami
-  # user_data = file("abc.sh")
+  user_data       = file("${path.module}/script_nginx.sh") # user data or any script
 
   # adding root block device
   root_block_device {
@@ -70,4 +70,3 @@ resource "aws_instance" "linux" {
     Name = "Terraform_ec2"
   }
 }
-*/
