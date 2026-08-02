@@ -1,96 +1,84 @@
 pipeline {
-
     agent any
 
     environment {
-
         AWS_DEFAULT_REGION = 'us-east-1'
-
     }
 
     stages {
 
         stage('Checkout Repository') {
-
             steps {
-
                 checkout scm
-
             }
+        }
 
+        stage('Verify Tools') {
+            steps {
+                sh '''
+                    echo "===== Installed Tools ====="
+                    terraform version
+                    aws --version
+                '''
+            }
         }
 
         stage('Terraform Init') {
-
             steps {
-
-                dir('terraform') {
-
-                    sh 'terraform init'
-
+                withCredentials([
+                    string(credentialsId: 'AWS_ACCESS_KEY_ID', variable: 'AWS_ACCESS_KEY_ID'),
+                    string(credentialsId: 'AWS_SECRET_ACCESS_KEY', variable: 'AWS_SECRET_ACCESS_KEY')
+                ]) {
+                    dir('DevOps_CICD_Project/terraform') {
+                        sh 'terraform init'
+                    }
                 }
-
             }
-
         }
 
         stage('Terraform Validate') {
-
             steps {
-
-                dir('terraform') {
-
-                    sh 'terraform validate'
-
+                withCredentials([
+                    string(credentialsId: 'AWS_ACCESS_KEY_ID', variable: 'AWS_ACCESS_KEY_ID'),
+                    string(credentialsId: 'AWS_SECRET_ACCESS_KEY', variable: 'AWS_SECRET_ACCESS_KEY')
+                ]) {
+                    dir('DevOps_CICD_Project/terraform') {
+                        sh 'terraform validate'
+                    }
                 }
-
             }
-
         }
 
         stage('Terraform Destroy') {
-
             steps {
-
                 withCredentials([
-
                     string(credentialsId: 'AWS_ACCESS_KEY_ID', variable: 'AWS_ACCESS_KEY_ID'),
-
                     string(credentialsId: 'AWS_SECRET_ACCESS_KEY', variable: 'AWS_SECRET_ACCESS_KEY')
-
                 ]) {
-
-                    dir('terraform') {
-
-                        sh '''
-                        terraform destroy \
-                        -auto-approve
-                        '''
-
+                    dir('DevOps_CICD_Project/terraform') {
+                        sh 'terraform destroy -auto-approve'
                     }
-
                 }
-
             }
-
         }
-
     }
 
     post {
-
         success {
-
+            echo '========================================'
             echo 'Infrastructure destroyed successfully.'
-
+            echo '========================================'
         }
 
         failure {
-
-            echo 'Terraform destroy failed.'
-
+            echo '========================================'
+            echo 'Terraform Destroy Failed.'
+            echo 'Check Jenkins Console Output.'
+            echo '========================================'
         }
 
+        always {
+            cleanWs()
+        }
     }
-
 }

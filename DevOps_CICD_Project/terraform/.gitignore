@@ -15,6 +15,4 @@ terraform.tfstate
 terraform.tfstate.backup
 *.tfstate.*
 crash.log
-terraform.tfvars
-*.tfvars
 token.txt
