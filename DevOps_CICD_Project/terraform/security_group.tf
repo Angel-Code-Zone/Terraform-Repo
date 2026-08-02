@@ -9,7 +9,7 @@ resource "aws_security_group" "app_sg" {
   ingress {
 
     description = "SSH"
-    from_port = 22
+    from_port   = 22
 
     to_port = 22
 

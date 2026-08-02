@@ -1,4 +1,5 @@
 variable "aws_region" {
+  type    = string
   default = "us-east-1"
 }
 
@@ -15,7 +16,7 @@ variable "availability_zone" {
 }
 
 variable "ami_id" {
-  default = "ami-020cba7c55df1f615"
+  default = "ami-0f8a61b66d1accaee"
 }
 
 variable "instance_type" {
