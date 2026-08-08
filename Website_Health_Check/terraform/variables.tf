@@ -73,3 +73,9 @@ variable "s3_bucket_name" {
   description = "S3 bucket"
   type        = string
 }
+
+variable "ami_id" {
+  description = "AMI ID for EC2 instances"
+  type        = string
+  default     = "ami-0c398cb65a93047f2" # Ubuntu 22.04 LTS
+}
