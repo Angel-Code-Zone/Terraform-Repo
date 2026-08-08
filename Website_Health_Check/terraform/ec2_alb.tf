@@ -29,7 +29,7 @@ data "aws_ami" "ubuntu" {
 # =========================================================
 
 resource "aws_instance" "website" {
-  ami           = data.aws_ami.ubuntu.id
+  ami           = var.ami_id
   instance_type = var.instance_type
 
   subnet_id = aws_subnet.private.id
