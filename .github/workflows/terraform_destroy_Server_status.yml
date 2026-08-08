@@ -1,0 +1,40 @@
+# terraform_destroy_Server_status.yml
+name: Terraform Destroy-Server Status
+
+on:
+  workflow_dispatch:
+
+jobs:
+  terraform-destroy:
+    name: Terraform Destroy - Website Health Check
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Terraform Init
+        working-directory: Website_Health_Check/terraform
+        run: terraform init
+
+      - name: Terraform Validate
+        working-directory: Website_Health_Check/terraform
+        run: terraform validate
+
+      - name: Terraform Destroy
+        working-directory: Website_Health_Check/terraform
+        env:
+          TF_VAR_docker_username: ${{ secrets.DOCKER_USERNAME }}
+          TF_VAR_docker_token: ${{ secrets.DOCKER_TOKEN }}
+        run: terraform destroy -auto-approve

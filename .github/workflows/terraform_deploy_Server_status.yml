@@ -1,0 +1,60 @@
+# terraform_deploy_Server_status.yml
+name: Terraform Deploy-Server Status
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "Website_Health_Check/terraform/**"
+      - "Website_Health_Check/scripts/**"
+      - "Website_Health_Check/Dockerfile_Website/**"
+      - "Website_Health_Check/.github/workflows/terraform_deploy_Server_status.yml"
+
+  workflow_dispatch:
+
+jobs:
+  terraform-deploy:
+    name: Terraform Deploy - Website Health Check
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Terraform Init
+        working-directory: Website_Health_Check/terraform
+        run: terraform init
+
+      - name: Terraform Format Check
+        working-directory: Website_Health_Check/terraform
+        run: terraform fmt -check
+
+      - name: Terraform Validate
+        working-directory: Website_Health_Check/terraform
+        run: terraform validate
+
+      - name: Terraform Plan
+        working-directory: Website_Health_Check/terraform
+        env:
+          TF_VAR_docker_username: ${{ secrets.DOCKER_USERNAME }}
+          TF_VAR_docker_token: ${{ secrets.DOCKER_TOKEN }}
+        run: terraform plan
+
+      - name: Terraform Apply
+        working-directory: Website_Health_Check/terraform
+        env:
+          TF_VAR_docker_username: ${{ secrets.DOCKER_USERNAME }}
+          TF_VAR_docker_token: ${{ secrets.DOCKER_TOKEN }}
+        run: terraform apply -auto-approve
