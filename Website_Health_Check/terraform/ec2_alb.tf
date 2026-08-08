@@ -43,14 +43,14 @@ resource "aws_instance" "website" {
   user_data = templatefile(
     "${path.module}/../scripts/user_data.sh",
     {
-docker_image             = var.docker_image
-    docker_username          = var.docker_username
-    docker_token             = var.docker_token
-    s3_bucket                = var.s3_bucket_name
-    dockerfile_b64           = filebase64("${path.module}/../Dockerfile_Website/Dockerfile")
-    index_html_b64           = filebase64("${path.module}/../Dockerfile_Website/index.html")
-    server_health_script_b64 = filebase64("${path.module}/../scripts/server_health_check.sh")
-    web_health_script_b64    = filebase64("${path.module}/../scripts/web_health_check.sh")
+      docker_image             = var.docker_image
+      docker_username          = var.docker_username
+      docker_token             = var.docker_token
+      s3_bucket                = var.s3_bucket_name
+      dockerfile_b64           = filebase64("${path.module}/../Dockerfile_Website/Dockerfile")
+      index_html_b64           = filebase64("${path.module}/../Dockerfile_Website/index.html")
+      server_health_script_b64 = filebase64("${path.module}/../scripts/server_health_check.sh")
+      web_health_script_b64    = filebase64("${path.module}/../scripts/web_health_check.sh")
     }
   )
 
