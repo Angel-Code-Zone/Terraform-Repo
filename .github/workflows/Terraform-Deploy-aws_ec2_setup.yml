@@ -1,9 +1,13 @@
-# GitHub Action file for destroying Terraform Infrastructure.
+# Github Action file for deployment of CI/CD pipeline.
 
-name: Terraform Destroy
+name: Terraform-Deploy-aws_ec2_setup
 
 on:
-  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - 'aws_ec2_setup/**'
 
 jobs:
   terraform:
@@ -31,10 +35,10 @@ jobs:
         working-directory: aws_ec2_setup
         run: terraform validate
 
-      - name: Terraform Destroy Plan
+      - name: Terraform Plan
         working-directory: aws_ec2_setup
-        run: terraform plan -destroy
+        run: terraform plan
 
-      - name: Terraform Destroy
+      - name: Terraform Apply
         working-directory: aws_ec2_setup
-        run: terraform destroy -auto-approve
+        run: terraform apply -auto-approve
