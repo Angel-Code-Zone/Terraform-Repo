@@ -1,5 +1,5 @@
 # =========================
-# VPC (Virtual Private Network)
+# Virtual Private Network
 # =========================
 
 resource "aws_vpc" "main" {
