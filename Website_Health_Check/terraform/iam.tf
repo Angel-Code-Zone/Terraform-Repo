@@ -1,4 +1,4 @@
-resource "aws_iam_role" "ec2_role" {
+resource "aws_iam_role" "ec2" {
   name = "website-health-ec2-role"
 
   assume_role_policy = jsonencode({
@@ -18,9 +18,10 @@ resource "aws_iam_role" "ec2_role" {
   })
 }
 
-resource "aws_iam_role_policy" "ec2_policy" {
-  name = "website-health-ec2-policy"
-  role = aws_iam_role.ec2_role.id
+
+resource "aws_iam_role_policy" "ec2_s3" {
+  name = "website-health-ec2-s3-policy"
+  role = aws_iam_role.ec2.id
 
   policy = jsonencode({
     Version = "2012-10-17"
@@ -30,7 +31,8 @@ resource "aws_iam_role_policy" "ec2_policy" {
         Effect = "Allow"
 
         Action = [
-          "s3:PutObject"
+          "s3:PutObject",
+          "s3:PutObjectAcl"
         ]
 
         Resource = [
@@ -42,7 +44,9 @@ resource "aws_iam_role_policy" "ec2_policy" {
   })
 }
 
-resource "aws_iam_instance_profile" "ec2_profile" {
+
+resource "aws_iam_instance_profile" "ec2" {
   name = "website-health-ec2-profile"
-  role = aws_iam_role.ec2_role.name
+
+  role = aws_iam_role.ec2.name
 }

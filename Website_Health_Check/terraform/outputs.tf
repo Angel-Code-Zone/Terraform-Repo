@@ -1,27 +1,39 @@
 output "vpc_id" {
-  value = aws_vpc.main.id
-}
-
-output "public_subnet_1_id" {
-  value = aws_subnet.public_1.id
-}
-
-output "public_subnet_2_id" {
-  value = aws_subnet.public_2.id
+  description = "VPC ID"
+  value       = aws_vpc.main.id
 }
 
 output "private_subnet_id" {
-  value = aws_subnet.private.id
+  description = "Private subnet ID"
+  value       = aws_subnet.private.id
 }
 
 output "ec2_instance_id" {
-  value = aws_instance.website.id
+  description = "EC2 instance ID"
+  value       = aws_instance.website.id
+}
+
+output "ec2_private_ip" {
+  description = "Private IP of EC2"
+  value       = aws_instance.website.private_ip
 }
 
 output "alb_dns_name" {
-  value = aws_lb.website.dns_name
+  description = "Application Load Balancer DNS name"
+  value       = aws_lb.website.dns_name
 }
 
-output "docker_image" {
-  value = var.docker_image
+output "website_url" {
+  description = "Website URL"
+  value       = "http://${aws_lb.website.dns_name}"
+}
+
+output "nat_gateway_public_ip" {
+  description = "NAT Gateway public IP"
+  value       = aws_eip.nat.public_ip
+}
+
+output "s3_bucket_name" {
+  description = "S3 bucket name"
+  value       = var.s3_bucket_name
 }

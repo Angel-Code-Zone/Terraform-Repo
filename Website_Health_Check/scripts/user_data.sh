@@ -31,10 +31,11 @@ apt-get update -y
 # -----------------------------------------
 
 apt-get install -y \
-    docker.io \
-    awscli \
-    curl \
-    unzip
+  docker.io \
+  awscli \
+  curl \
+  unzip \
+  cron
 
 # -----------------------------------------
 # Start Docker
@@ -55,10 +56,6 @@ mkdir -p "$APP_DIR"
 # Create Dockerfile
 # -----------------------------------------
 
-cat > "$APP_DIR/Dockerfile" <<'EOF'
-${dockerfile_b64}
-EOF
-
 echo "${dockerfile_b64}" | base64 -d > "$APP_DIR/Dockerfile"
 
 # -----------------------------------------
@@ -72,8 +69,8 @@ echo "${index_html_b64}" | base64 -d > "$APP_DIR/index.html"
 # -----------------------------------------
 
 echo "$DOCKER_TOKEN" | docker login \
-    -u "$DOCKER_USERNAME" \
-    --password-stdin
+  -u "$DOCKER_USERNAME" \
+  --password-stdin
 
 echo "Docker Hub login successful."
 
@@ -84,8 +81,8 @@ echo "Docker Hub login successful."
 cd "$APP_DIR"
 
 docker build \
-    -t "$DOCKER_IMAGE" \
-    .
+  -t "$DOCKER_IMAGE" \
+  .
 
 echo "Docker image built successfully."
 
@@ -116,10 +113,10 @@ echo "Docker image pulled successfully."
 # -----------------------------------------
 
 docker run -d \
-    --name website-container \
-    --restart unless-stopped \
-    -p 80:80 \
-    "$DOCKER_IMAGE"
+  --name website-container \
+  --restart unless-stopped \
+  -p 80:80 \
+  "$DOCKER_IMAGE"
 
 echo "Website container started."
 
@@ -158,6 +155,7 @@ chmod 644 /etc/cron.d/website-health-check
 # -----------------------------------------
 
 /usr/local/bin/server_health_check.sh || true
+
 /usr/local/bin/web_health_check.sh || true
 
 echo "========================================="
