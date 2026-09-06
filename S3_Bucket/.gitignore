@@ -7,3 +7,9 @@
 *.pem
 *.pub
 ec2_key_pair-tf
+.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+*.tfvars
+*.tfvars.json
