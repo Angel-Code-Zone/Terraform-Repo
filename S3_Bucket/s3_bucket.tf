@@ -1,7 +1,7 @@
 # AWS S3 buckets
 
 resource "aws_s3_bucket" "my_bucket" {
-  bucket = "rakesh2027"
+  bucket = "rakesh-2027"
 
   tags = {
     Name        = "rakesh_s3_terraform"
@@ -11,7 +11,7 @@ resource "aws_s3_bucket" "my_bucket" {
 }
 
 resource "aws_s3_bucket" "my_s3_bucket" {
-  bucket = "rakesh98922"
+  bucket = "rakesh-2026"
 
   tags = {
     Name        = "rakesh_s3_bucket"
