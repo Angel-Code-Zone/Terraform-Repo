@@ -1,4 +1,4 @@
-# Jenkinsfile for CICD pipeline.
+// Jenkinsfile for CICD pipeline.
 
 pipeline {
     agent any
