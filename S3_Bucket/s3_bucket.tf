@@ -1,4 +1,4 @@
-# AWS S3 bucket
+# AWS S3 buckets
 
 resource "aws_s3_bucket" "my_bucket" {
   bucket = "rakesh2027"
