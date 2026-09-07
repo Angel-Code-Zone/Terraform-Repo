@@ -1,0 +1,185 @@
+pipeline {
+    agent any
+
+    parameters {
+        choice(
+            name: 'ACTION',
+            choices: ['plan', 'apply', 'destroy'],
+            description: 'Choose Terraform action'
+        )
+    }
+
+    stages {
+
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Terraform Validate') {
+            steps {
+                dir('dev') {
+                    sh '''
+                        terraform init
+                        terraform validate
+                    '''
+                }
+
+                dir('stage') {
+                    sh '''
+                        terraform init
+                        terraform validate
+                    '''
+                }
+
+                dir('prod') {
+                    sh '''
+                        terraform init
+                        terraform validate
+                    '''
+                }
+            }
+        }
+
+        stage('DEV') {
+            when {
+                expression {
+                    !params.ACTION || params.ACTION == 'apply'
+                }
+            }
+
+            steps {
+                dir('dev') {
+                    withCredentials([
+                        [$class: 'AmazonWebServicesCredentialsBinding',
+                         credentialsId: 'aws-terraform']
+                    ]) {
+                        sh '''
+                            terraform plan
+                            terraform apply -auto-approve
+                        '''
+                    }
+                }
+            }
+        }
+
+        stage('STAGE') {
+            when {
+                expression {
+                    !params.ACTION || params.ACTION == 'apply'
+                }
+            }
+
+            steps {
+                dir('stage') {
+                    withCredentials([
+                        [$class: 'AmazonWebServicesCredentialsBinding',
+                         credentialsId: 'aws-terraform']
+                    ]) {
+                        sh '''
+                            terraform plan
+                            terraform apply -auto-approve
+                        '''
+                    }
+                }
+            }
+        }
+
+        stage('PROD') {
+            when {
+                expression {
+                    !params.ACTION || params.ACTION == 'apply'
+                }
+            }
+
+            steps {
+                dir('prod') {
+                    withCredentials([
+                        [$class: 'AmazonWebServicesCredentialsBinding',
+                         credentialsId: 'aws-terraform']
+                    ]) {
+                        sh '''
+                            terraform plan
+                            terraform apply -auto-approve
+                        '''
+                    }
+                }
+            }
+        }
+
+        stage('PLAN') {
+            when {
+                expression {
+                    params.ACTION == 'plan'
+                }
+            }
+
+            steps {
+                dir('dev') {
+                    withCredentials([
+                        [$class: 'AmazonWebServicesCredentialsBinding',
+                         credentialsId: 'aws-terraform']
+                    ]) {
+                        sh 'terraform plan'
+                    }
+                }
+
+                dir('stage') {
+                    withCredentials([
+                        [$class: 'AmazonWebServicesCredentialsBinding',
+                         credentialsId: 'aws-terraform']
+                    ]) {
+                        sh 'terraform plan'
+                    }
+                }
+
+                dir('prod') {
+                    withCredentials([
+                        [$class: 'AmazonWebServicesCredentialsBinding',
+                         credentialsId: 'aws-terraform']
+                    ]) {
+                        sh 'terraform plan'
+                    }
+                }
+            }
+        }
+
+        stage('DESTROY') {
+            when {
+                expression {
+                    params.ACTION == 'destroy'
+                }
+            }
+
+            steps {
+                dir('dev') {
+                    withCredentials([
+                        [$class: 'AmazonWebServicesCredentialsBinding',
+                         credentialsId: 'aws-terraform']
+                    ]) {
+                        sh 'terraform destroy -auto-approve'
+                    }
+                }
+
+                dir('stage') {
+                    withCredentials([
+                        [$class: 'AmazonWebServicesCredentialsBinding',
+                         credentialsId: 'aws-terraform']
+                    ]) {
+                        sh 'terraform destroy -auto-approve'
+                    }
+                }
+
+                dir('prod') {
+                    withCredentials([
+                        [$class: 'AmazonWebServicesCredentialsBinding',
+                         credentialsId: 'aws-terraform']
+                    ]) {
+                        sh 'terraform destroy -auto-approve'
+                    }
+                }
+            }
+        }
+    }
+}
