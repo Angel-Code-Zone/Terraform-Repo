@@ -6,8 +6,8 @@ pipeline {
     parameters {
         choice(
             name: 'ACTION',
-            choices: ['apply', 'destroy'],
-            description: 'Select Terraform operation'
+            choices: ['apply', 'plan', 'destroy'],
+            description: 'Choose the Terraform operation'
         )
     }
 
@@ -43,9 +43,10 @@ pipeline {
         stage('Terraform Plan') {
             when {
                 expression {
-                    params.ACTION == 'apply'
+                    params.ACTION == 'plan' || params.ACTION == 'apply'
                 }
             }
+
             steps {
                 dir('S3_Bucket') {
                     withCredentials([
@@ -64,6 +65,7 @@ pipeline {
                     params.ACTION == 'apply'
                 }
             }
+
             steps {
                 dir('S3_Bucket') {
                     withCredentials([
@@ -82,6 +84,7 @@ pipeline {
                     params.ACTION == 'destroy'
                 }
             }
+
             steps {
                 dir('S3_Bucket') {
                     withCredentials([
