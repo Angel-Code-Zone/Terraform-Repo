@@ -1,4 +1,4 @@
-// Jenkinsfile for Modules & Multi Stages CI/CD pipeline
+// Jenkinsfile for Modules & Multi Stages CI/CD pipeline.
 
 pipeline {
     agent any
