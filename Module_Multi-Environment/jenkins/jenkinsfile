@@ -6,36 +6,31 @@ pipeline {
     parameters {
         choice(
             name: 'ACTION',
-            choices: ['plan', 'apply', 'destroy'],
+            choices: ['apply', 'plan', 'destroy'],
             description: 'Choose Terraform action'
         )
     }
 
     stages {
 
-        stage('Checkout') {
-            steps {
-                checkout scm
-            }
-        }
-
         stage('Terraform Validate') {
             steps {
-                dir('dev') {
+
+                dir('Module_Multi-Environment/dev') {
                     sh '''
                         terraform init
                         terraform validate
                     '''
                 }
 
-                dir('stage') {
+                dir('Module_Multi-Environment/stage') {
                     sh '''
                         terraform init
                         terraform validate
                     '''
                 }
 
-                dir('prod') {
+                dir('Module_Multi-Environment/prod') {
                     sh '''
                         terraform init
                         terraform validate
@@ -47,12 +42,12 @@ pipeline {
         stage('DEV') {
             when {
                 expression {
-                    !params.ACTION || params.ACTION == 'apply'
+                    params.ACTION == 'apply'
                 }
             }
 
             steps {
-                dir('dev') {
+                dir('Module_Multi-Environment/dev') {
                     withCredentials([
                         [$class: 'AmazonWebServicesCredentialsBinding',
                          credentialsId: 'aws-terraform']
@@ -69,12 +64,12 @@ pipeline {
         stage('STAGE') {
             when {
                 expression {
-                    !params.ACTION || params.ACTION == 'apply'
+                    params.ACTION == 'apply'
                 }
             }
 
             steps {
-                dir('stage') {
+                dir('Module_Multi-Environment/stage') {
                     withCredentials([
                         [$class: 'AmazonWebServicesCredentialsBinding',
                          credentialsId: 'aws-terraform']
@@ -91,12 +86,12 @@ pipeline {
         stage('PROD') {
             when {
                 expression {
-                    !params.ACTION || params.ACTION == 'apply'
+                    params.ACTION == 'apply'
                 }
             }
 
             steps {
-                dir('prod') {
+                dir('Module_Multi-Environment/prod') {
                     withCredentials([
                         [$class: 'AmazonWebServicesCredentialsBinding',
                          credentialsId: 'aws-terraform']
@@ -118,7 +113,8 @@ pipeline {
             }
 
             steps {
-                dir('dev') {
+
+                dir('Module_Multi-Environment/dev') {
                     withCredentials([
                         [$class: 'AmazonWebServicesCredentialsBinding',
                          credentialsId: 'aws-terraform']
@@ -127,7 +123,7 @@ pipeline {
                     }
                 }
 
-                dir('stage') {
+                dir('Module_Multi-Environment/stage') {
                     withCredentials([
                         [$class: 'AmazonWebServicesCredentialsBinding',
                          credentialsId: 'aws-terraform']
@@ -136,7 +132,7 @@ pipeline {
                     }
                 }
 
-                dir('prod') {
+                dir('Module_Multi-Environment/prod') {
                     withCredentials([
                         [$class: 'AmazonWebServicesCredentialsBinding',
                          credentialsId: 'aws-terraform']
@@ -155,7 +151,8 @@ pipeline {
             }
 
             steps {
-                dir('dev') {
+
+                dir('Module_Multi-Environment/dev') {
                     withCredentials([
                         [$class: 'AmazonWebServicesCredentialsBinding',
                          credentialsId: 'aws-terraform']
@@ -164,7 +161,7 @@ pipeline {
                     }
                 }
 
-                dir('stage') {
+                dir('Module_Multi-Environment/stage') {
                     withCredentials([
                         [$class: 'AmazonWebServicesCredentialsBinding',
                          credentialsId: 'aws-terraform']
@@ -173,7 +170,7 @@ pipeline {
                     }
                 }
 
-                dir('prod') {
+                dir('Module_Multi-Environment/prod') {
                     withCredentials([
                         [$class: 'AmazonWebServicesCredentialsBinding',
                          credentialsId: 'aws-terraform']
