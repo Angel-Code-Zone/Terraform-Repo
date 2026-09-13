@@ -3,42 +3,60 @@
 pipeline {
     agent any
 
+    options {
+        skipDefaultCheckout(true)
+    }
+
     parameters {
         choice(
             name: 'ACTION',
             choices: ['apply', 'plan', 'destroy'],
-            description: 'Choose Terraform action'
+            description: 'Choose Terraform operation'
         )
     }
 
     stages {
 
+        // ============================================================
+        // CHECKOUT
+        // ============================================================
+        stage('Checkout SCM') {
+            steps {
+                checkout scm
+            }
+        }
+
+        // ============================================================
+        // TERRAFORM VALIDATION
+        // ============================================================
         stage('Terraform Validate') {
             steps {
+                script {
+                    ['dev', 'stage', 'prod'].each { environment ->
 
-                dir('Module_Multi-Environment/dev') {
-                    sh '''
-                        terraform init
-                        terraform validate
-                    '''
-                }
+                        echo "Validating ${environment} environment..."
 
-                dir('Module_Multi-Environment/stage') {
-                    sh '''
-                        terraform init
-                        terraform validate
-                    '''
-                }
+                        dir("Module_Multi-Environment/${environment}") {
 
-                dir('Module_Multi-Environment/prod') {
-                    sh '''
-                        terraform init
-                        terraform validate
-                    '''
+                            withCredentials([
+                                [$class: 'AmazonWebServicesCredentialsBinding',
+                                 credentialsId: 'aws-terraform']
+                            ]) {
+
+                                sh '''
+                                    terraform init
+                                    terraform validate
+                                '''
+                            }
+                        }
+                    }
                 }
             }
         }
 
+        // ============================================================
+        // DEV
+        // ============================================================
         stage('DEV') {
             when {
                 expression {
@@ -47,12 +65,17 @@ pipeline {
             }
 
             steps {
+                echo "Deploying DEV environment..."
+
                 dir('Module_Multi-Environment/dev') {
+
                     withCredentials([
                         [$class: 'AmazonWebServicesCredentialsBinding',
                          credentialsId: 'aws-terraform']
                     ]) {
+
                         sh '''
+                            terraform init
                             terraform plan
                             terraform apply -auto-approve
                         '''
@@ -61,6 +84,9 @@ pipeline {
             }
         }
 
+        // ============================================================
+        // STAGE
+        // ============================================================
         stage('STAGE') {
             when {
                 expression {
@@ -69,12 +95,17 @@ pipeline {
             }
 
             steps {
+                echo "Deploying STAGE environment..."
+
                 dir('Module_Multi-Environment/stage') {
+
                     withCredentials([
                         [$class: 'AmazonWebServicesCredentialsBinding',
                          credentialsId: 'aws-terraform']
                     ]) {
+
                         sh '''
+                            terraform init
                             terraform plan
                             terraform apply -auto-approve
                         '''
@@ -83,6 +114,9 @@ pipeline {
             }
         }
 
+        // ============================================================
+        // PROD
+        // ============================================================
         stage('PROD') {
             when {
                 expression {
@@ -91,12 +125,17 @@ pipeline {
             }
 
             steps {
+                echo "Deploying PROD environment..."
+
                 dir('Module_Multi-Environment/prod') {
+
                     withCredentials([
                         [$class: 'AmazonWebServicesCredentialsBinding',
                          credentialsId: 'aws-terraform']
                     ]) {
+
                         sh '''
+                            terraform init
                             terraform plan
                             terraform apply -auto-approve
                         '''
@@ -105,6 +144,9 @@ pipeline {
             }
         }
 
+        // ============================================================
+        // PLAN
+        // ============================================================
         stage('PLAN') {
             when {
                 expression {
@@ -113,36 +155,32 @@ pipeline {
             }
 
             steps {
+                script {
+                    ['dev', 'stage', 'prod'].each { environment ->
 
-                dir('Module_Multi-Environment/dev') {
-                    withCredentials([
-                        [$class: 'AmazonWebServicesCredentialsBinding',
-                         credentialsId: 'aws-terraform']
-                    ]) {
-                        sh 'terraform plan'
-                    }
-                }
+                        echo "Running Terraform PLAN for ${environment}..."
 
-                dir('Module_Multi-Environment/stage') {
-                    withCredentials([
-                        [$class: 'AmazonWebServicesCredentialsBinding',
-                         credentialsId: 'aws-terraform']
-                    ]) {
-                        sh 'terraform plan'
-                    }
-                }
+                        dir("Module_Multi-Environment/${environment}") {
 
-                dir('Module_Multi-Environment/prod') {
-                    withCredentials([
-                        [$class: 'AmazonWebServicesCredentialsBinding',
-                         credentialsId: 'aws-terraform']
-                    ]) {
-                        sh 'terraform plan'
+                            withCredentials([
+                                [$class: 'AmazonWebServicesCredentialsBinding',
+                                 credentialsId: 'aws-terraform']
+                            ]) {
+
+                                sh '''
+                                    terraform init
+                                    terraform plan
+                                '''
+                            }
+                        }
                     }
                 }
             }
         }
 
+        // ============================================================
+        // DESTROY
+        // ============================================================
         stage('DESTROY') {
             when {
                 expression {
@@ -151,34 +189,51 @@ pipeline {
             }
 
             steps {
+                script {
 
-                dir('Module_Multi-Environment/dev') {
-                    withCredentials([
-                        [$class: 'AmazonWebServicesCredentialsBinding',
-                         credentialsId: 'aws-terraform']
-                    ]) {
-                        sh 'terraform destroy -auto-approve'
-                    }
-                }
+                    // Destroy PROD first, then STAGE, then DEV
+                    ['prod', 'stage', 'dev'].each { environment ->
 
-                dir('Module_Multi-Environment/stage') {
-                    withCredentials([
-                        [$class: 'AmazonWebServicesCredentialsBinding',
-                         credentialsId: 'aws-terraform']
-                    ]) {
-                        sh 'terraform destroy -auto-approve'
-                    }
-                }
+                        echo "Destroying ${environment} environment..."
 
-                dir('Module_Multi-Environment/prod') {
-                    withCredentials([
-                        [$class: 'AmazonWebServicesCredentialsBinding',
-                         credentialsId: 'aws-terraform']
-                    ]) {
-                        sh 'terraform destroy -auto-approve'
+                        dir("Module_Multi-Environment/${environment}") {
+
+                            withCredentials([
+                                [$class: 'AmazonWebServicesCredentialsBinding',
+                                 credentialsId: 'aws-terraform']
+                            ]) {
+
+                                sh '''
+                                    terraform init
+                                    terraform destroy -auto-approve
+                                '''
+                            }
+                        }
                     }
                 }
             }
+        }
+    }
+
+    // ================================================================
+    // POST ACTIONS
+    // ================================================================
+    post {
+
+        success {
+            echo '================================================'
+            echo 'Terraform CI/CD Pipeline Completed Successfully'
+            echo '================================================'
+        }
+
+        failure {
+            echo '================================================'
+            echo 'Terraform CI/CD Pipeline Failed'
+            echo '================================================'
+        }
+
+        always {
+            echo 'Terraform pipeline execution finished.'
         }
     }
 }

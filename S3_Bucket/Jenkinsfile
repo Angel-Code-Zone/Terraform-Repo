@@ -1,4 +1,5 @@
-// Jenkinsfile for CI/CD pipeline
+// Jenkinsfile for CI/CD pipeline.
+// Chabge the choices plan to directly apply this (choices: ['apply', 'plan', 'destroy'])
 
 pipeline {
     agent any
