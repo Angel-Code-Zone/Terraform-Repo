@@ -1,0 +1,107 @@
+Terraform Multi-Environment CI/CD — Diagram Design
+
+Module_Multi-Environment/
+│
+├── dev/
+│       ├── main.tf
+│       ├── variables.tf
+│       └── outputs.tf
+│
+├── stage/
+│       ├── main.tf
+│       ├── variables.tf
+│       └── outputs.tf
+│
+├── prod/
+│       ├── main.tf
+│       ├── variables.tf
+│       └── outputs.tf
+│
+├── modules/
+│   └── s3/
+│       ├── main.tf
+│       ├── variables.tf
+│       └── outputs.tf
+│
+└── jenkins/
+    └── jenkinsfile
+
+                         ┌──────────────────────────┐
+                         │        👨‍💻 Developer      │
+                         │     Code Changes / Push  │
+                         └────────────┬─────────────┘
+                                      │
+                                      │ git push
+                                      ▼
+                         ┌──────────────────────────┐
+                         │        🐙 GitHub         │
+                         │  Terraform Repository    │
+                         │                          │
+                         │  Module_Multi-Environment│
+                         └────────────┬─────────────┘
+                                      │
+                                      │ Webhook
+                                      ▼
+                  ┌─────────────────────────────────────┐
+                  │              🔧 Jenkins             │
+                  │                                     │
+                  │        CI/CD Pipeline               │
+                  │                                     │
+                  │  ┌───────────────────────────────┐  │
+                  │  │  1. Checkout SCM              │  │
+                  │  │  2. Terraform Validate        │  │
+                  │  └──────────────┬────────────────┘  │
+                  │                 │                   │
+                  │                 ▼                   │
+                  │       ┌───────────────────┐         │
+                  │       │   Terraform S3     │        │
+                  │       │      Module        │        │
+                  │       └─────────┬─────────┘         │
+                  │                 │                   │
+                  │        ┌────────┴────────┐          │
+                  │        │                 │          │
+                  └────────┼─────────────────┼──────────┘
+                           │                 │
+                           ▼                 ▼
+                 ┌────────────────┐   ┌────────────────┐
+                 │   🌱 DEV       │   │  🧪 STAGE     │
+                 │                │   │                │
+                 │ terraform      │   │ terraform      │
+                 │ plan/apply     │   │ plan/apply     │
+                 └───────┬────────┘   └───────┬────────┘
+                         │                    │
+                         │ Success            │ Success
+                         └──────────┬─────────┘
+                                    ▼
+                           ┌────────────────┐
+                           │   🚀 PROD      │
+                           │                │
+                           │ terraform      │
+                           │ plan/apply     │
+                           └───────┬────────┘
+                                   │
+                                   ▼
+                 ┌───────────────────────────────────┐
+                 │            ☁️ AWS ACCOUNT         │
+                 │                                   │
+                 │  ┌─────────────────────────────┐  │
+                 │  │ S3 – DEV                    │  │
+                 │  │ rakesh-terraform-dev-2026   │  │
+                 │  └─────────────────────────────┘  │
+                 │                                   │
+                 │  ┌─────────────────────────────┐  │
+                 │  │ S3 – STAGE                  │  │
+                 │  │ rakesh-terraform-stage-2026 │  │
+                 │  └─────────────────────────────┘  │
+                 │                                   │
+                 │  ┌─────────────────────────────┐  │
+                 │  │ S3 – PROD                   │  │
+                 │  │ rakesh-terraform-prod-2026  │  │
+                 │  └─────────────────────────────┘  │
+                 └───────────────────────────────────┘
+
+                    🔐 Jenkins AWS Credential
+                         aws-terraform
+                              │
+                              ▼
+                         AWS Authentication
